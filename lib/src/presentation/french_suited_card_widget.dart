@@ -35,23 +35,8 @@ class FrenchSuitedCard extends StatelessWidget {
   }
 
   SvgPicture get suitImage {
-    String assetName = "";
-    switch (suit) {
-      case Suit.clubs:
-        assetName = "lib/images/clubs.svg";
-        break;
-      case Suit.spades:
-        assetName = "lib/images/spades.svg";
-        break;
-      case Suit.diamonds:
-        assetName = "lib/images/diamonds.svg";
-        break;
-      case Suit.hearts:
-        assetName = "lib/images/hearts.svg";
-        break;
-    }
     return SvgPicture.asset(
-      assetName,
+      SuitExtension.getAssetName(suit),
       width: 25,
       height: 25,
     );

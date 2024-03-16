@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:freecell_application/src/domain/card_sequence.dart';
 import 'package:freecell_application/src/domain/enums/suit.dart';
 
 class CardSequence extends StatelessWidget {
-  final double cardSpacing;
-
   const CardSequence({
     super.key,
-    this.cardSpacing = 20,
   });
 
   @override
@@ -17,27 +15,12 @@ class CardSequence extends StatelessWidget {
       return const Text("Error");
     }
 
-    Color color;
-    switch (inheritedData.suit) {
-      case Suit.clubs:
-        color = Colors.black;
-        break;
-      case Suit.hearts:
-        color = Colors.green;
-        break;
-      case Suit.diamonds:
-        color = Colors.red;
-        break;
-      case Suit.spades:
-        color = Colors.yellow;
-        break;
-    }
-
     if (inheritedData.cards.isEmpty) {
       return Container(
         width: 100,
         height: 150,
-        color: color,
+        color: Colors.green,
+        child: SvgPicture.asset(SuitExtension.getAssetName(inheritedData.suit)),
       );
     }
     return inheritedData.cards.last;

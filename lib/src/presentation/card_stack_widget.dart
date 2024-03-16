@@ -4,7 +4,7 @@ import 'package:freecell_application/src/domain/card_stack.dart';
 class CardStack extends StatelessWidget {
   final double cardSpacing;
 
-  const CardStack({super.key, this.cardSpacing = 20});
+  const CardStack({super.key, this.cardSpacing = 50});
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +25,14 @@ class CardStack extends StatelessWidget {
         width: 100,
         height: 150 + (cardSpacing * inheritedData.cards.length - 1),
         child: Stack(
+          alignment: Alignment.center,
           children: inheritedData.cards.map((e) {
             var i = inheritedData.cards.indexOf(e);
             var top = i * cardSpacing;
             return Positioned(
               top: top,
               child: Draggable(
-                data: 1,
+                data: (e, context.widget),
                 feedback: Material(
                   elevation: 5,
                   child: e,
