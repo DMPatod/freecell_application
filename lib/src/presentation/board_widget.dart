@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:freecell_application/src/domain/card_holder.dart';
 import 'package:freecell_application/src/domain/card_sequence.dart';
 import 'package:freecell_application/src/domain/card_slot.dart';
 import 'package:freecell_application/src/domain/card_stack.dart';
 import 'package:freecell_application/src/domain/deck.dart';
 import 'package:freecell_application/src/domain/enums/suit.dart';
+import 'package:freecell_application/src/domain/move_callback.dart';
 import 'package:freecell_application/src/presentation/card_sequence_widget.dart';
 import 'package:freecell_application/src/presentation/card_slot_widget.dart';
 import 'package:freecell_application/src/presentation/card_stack_widget.dart';
 import 'package:freecell_application/src/presentation/french_suited_card_widget.dart';
+import 'package:logger/logger.dart';
 
 class Board extends StatefulWidget {
-  const Board({super.key});
+  final Logger logger = Logger();
+
+  Board({super.key});
 
   @override
   State<StatefulWidget> createState() => _BoardState();
 }
 
 class _BoardState extends State<Board> {
-  final List<FrenchSuitedCard?> _slots = List.filled(4, null);
+  final List<List<FrenchSuitedCard>> _slots = List.empty(growable: true);
   final List<(List<FrenchSuitedCard>, Suit)> _sequences =
       List.empty(growable: true);
   final List<List<FrenchSuitedCard>> _stacks = List.empty(growable: true);
@@ -33,9 +38,13 @@ class _BoardState extends State<Board> {
       _stacks.add(item);
     }
 
+    for (var i = 0; i < 4; i++) {
+      _slots.add(List<FrenchSuitedCard>.empty(growable: true));
+    }
+
     var suits = Suit.values;
     for (var item in suits) {
-      _sequences.add((List<FrenchSuitedCard>.empty(), item));
+      _sequences.add((List<FrenchSuitedCard>.empty(growable: true), item));
     }
 
     super.initState();
@@ -49,28 +58,33 @@ class _BoardState extends State<Board> {
           children: [
             Expanded(
                 child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ..._slots.map((e) => Expanded(
-                      child: CardSlotModel(
-                        e,
-                        child: const CardSlot(),
-                      ),
+                ..._slots.map((e) => CardSlotModel(
+                      e,
+                      moveCallback,
+                      child: CardSlot(),
                     ))
               ],
             )),
-            const Divider(),
+            const SizedBox(
+              width: 15,
+            ),
             Expanded(
-                child: Row(
-              children: [
-                ..._sequences.map((e) => Expanded(
-                      child: CardSequenceModel(
-                        e.$1,
-                        e.$2,
-                        child: const CardSequence(),
-                      ),
-                    ))
-              ],
-            ))
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ..._sequences.map(
+                    (e) => CardSequenceModel(
+                      e.$1,
+                      e.$2,
+                      moveCallback,
+                      child: CardSequence(),
+                    ),
+                  )
+                ],
+              ),
+            )
           ],
         ),
         const Divider(),
@@ -80,7 +94,8 @@ class _BoardState extends State<Board> {
             ..._stacks.map((e) => Expanded(
                   child: CardStackModel(
                     e,
-                    child: const CardStack(),
+                    moveCallback,
+                    child: CardStack(),
                   ),
                 ))
           ],
@@ -88,4 +103,18 @@ class _BoardState extends State<Board> {
       ],
     );
   }
+
+  MoveCallback get moveCallback =>
+      (List<FrenchSuitedCard> set, Widget from, Widget to) {
+        setState(() {
+          var fromHolder = from as CardHolder;
+
+          for (int i = 0; i < set.length; i++) {
+            fromHolder.cards.removeLast();
+          }
+
+          var toHolder = to as CardHolder;
+          toHolder.cards.addAll(set);
+        });
+      };
 }

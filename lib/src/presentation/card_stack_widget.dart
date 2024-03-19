@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:freecell_application/src/domain/card_holder.dart';
 import 'package:freecell_application/src/domain/card_stack.dart';
+import 'package:freecell_application/src/presentation/french_suited_card_widget.dart';
+import 'package:logger/logger.dart';
 
-class CardStack extends StatelessWidget {
+class CardStack extends StatelessWidget implements CardHolder {
+  final Logger logger = Logger();
   final double cardSpacing;
 
-  const CardStack({super.key, this.cardSpacing = 50});
+  CardStack({super.key, this.cardSpacing = 50});
+
+  @override
+  late final List<FrenchSuitedCard> cards;
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +20,10 @@ class CardStack extends StatelessWidget {
       return const Text("Error");
     }
 
+    cards = inheritedData.cards;
+
     Widget widget;
-    if (inheritedData.cards.isEmpty) {
+    if (cards.isEmpty) {
       widget = Container(
         width: 100,
         height: 150,
@@ -23,16 +32,22 @@ class CardStack extends StatelessWidget {
     } else {
       widget = SizedBox(
         width: 100,
-        height: 150 + (cardSpacing * inheritedData.cards.length - 1),
+        height: 150 + (cardSpacing * cards.length - 1),
         child: Stack(
           alignment: Alignment.center,
-          children: inheritedData.cards.map((e) {
-            var i = inheritedData.cards.indexOf(e);
+          children: cards.map((e) {
+            var i = cards.indexOf(e);
             var top = i * cardSpacing;
+
+            var set = List<FrenchSuitedCard>.empty(growable: true);
+            for (int j = i; j < cards.length; j++) {
+              set.add(cards[j]);
+            }
+
             return Positioned(
               top: top,
               child: Draggable(
-                data: (e, context.widget),
+                data: (set, this),
                 feedback: Material(
                   elevation: 5,
                   child: e,
@@ -45,17 +60,27 @@ class CardStack extends StatelessWidget {
       );
     }
 
-    return DragTarget(
-        onWillAcceptWithDetails: (details) {
-          return false;
-        },
-        onAcceptWithDetails: (details) {},
-        builder: (context, candidateDate, rejectedData) {
-          return SizedBox(
-            width: 100,
-            height: 150 + (cardSpacing * inheritedData.cards.length - 1),
-            child: widget,
-          );
-        });
+    return DragTarget(onAcceptWithDetails: (details) {
+      var move = details.data as (List<FrenchSuitedCard>, Widget);
+      var moveValidated = true;
+
+      if (move.$1.first.value != cards.last.value - 1) {
+        moveValidated = false;
+      }
+
+      if (move.$1.first.color == cards.last.color) {
+        moveValidated = false;
+      }
+
+      if (moveValidated) {
+        inheritedData.callback(move.$1, move.$2, this);
+      }
+    }, builder: (context, candidateData, rejectedData) {
+      return SizedBox(
+        width: 100,
+        height: 150 + (cardSpacing * cards.length - 1),
+        child: widget,
+      );
+    });
   }
 }

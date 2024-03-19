@@ -1,10 +1,13 @@
 import 'package:flutter/widgets.dart';
+import 'package:freecell_application/src/domain/move_callback.dart';
 import 'package:freecell_application/src/presentation/french_suited_card_widget.dart';
 
 class CardSlotModel extends InheritedWidget {
-  final FrenchSuitedCard? card;
+  final List<FrenchSuitedCard> cards;
+  final MoveCallback callback;
 
-  const CardSlotModel(this.card, {super.key, required super.child});
+  const CardSlotModel(this.cards, this.callback,
+      {super.key, required super.child});
 
   static CardSlotModel? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<CardSlotModel>();
@@ -12,6 +15,6 @@ class CardSlotModel extends InheritedWidget {
 
   @override
   bool updateShouldNotify(CardSlotModel oldWidget) {
-    return oldWidget.card != card;
+    return oldWidget.cards != cards;
   }
 }

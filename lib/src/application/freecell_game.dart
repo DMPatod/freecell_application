@@ -11,7 +11,7 @@ class FreeCellGame extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Game"),
         ),
-        body: const Center(
+        body: Center(
           child: Board(),
         ),
       ),
