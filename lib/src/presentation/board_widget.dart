@@ -4,8 +4,11 @@ import 'package:freecell_application/src/domain/card_sequence.dart';
 import 'package:freecell_application/src/domain/card_slot.dart';
 import 'package:freecell_application/src/domain/card_stack.dart';
 import 'package:freecell_application/src/domain/deck.dart';
+import 'package:freecell_application/src/domain/enums/board_position.dart';
 import 'package:freecell_application/src/domain/enums/suit.dart';
 import 'package:freecell_application/src/domain/move_callback.dart';
+import 'package:freecell_application/src/domain/movement.dart';
+import 'package:freecell_application/src/domain/position.dart';
 import 'package:freecell_application/src/presentation/card_sequence_widget.dart';
 import 'package:freecell_application/src/presentation/card_slot_widget.dart';
 import 'package:freecell_application/src/presentation/card_stack_widget.dart';
@@ -22,10 +25,16 @@ class Board extends StatefulWidget {
 }
 
 class _BoardState extends State<Board> {
+  final Logger logger = Logger();
+
   final List<List<FrenchSuitedCard>> _slots = List.empty(growable: true);
   final List<(List<FrenchSuitedCard>, Suit)> _sequences =
       List.empty(growable: true);
   final List<List<FrenchSuitedCard>> _stacks = List.empty(growable: true);
+
+  final List<Movement> _movements = List.empty(growable: true);
+
+  int life = 5;
 
   @override
   void initState() {
@@ -98,6 +107,58 @@ class _BoardState extends State<Board> {
                     child: CardStack(),
                   ),
                 ))
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            MaterialButton(
+              onPressed: () {},
+              child: const Text("Undo"),
+            ),
+            MaterialButton(
+              onPressed: () {
+                Map<String, Position> dic = {};
+
+                for (var i = 0; i < [_stacks, _slots, _sequences].length; i++) {
+                  BoardPosition pos;
+                  List<List<FrenchSuitedCard>> collection;
+                  switch (i) {
+                    case 0:
+                      collection = _stacks;
+                      pos = BoardPosition.stack;
+                      break;
+                    case 1:
+                      collection = _slots;
+                      pos = BoardPosition.slot;
+                      break;
+                    case 2:
+                      collection = _sequences.map((e) => e.$1).toList();
+                      pos = BoardPosition.sequence;
+                      break;
+                    default:
+                      throw Exception("Position Not Implemented");
+                  }
+
+                  for (var list in collection) {
+                    var i = collection.indexOf(list);
+                    for (var card in list) {
+                      dic[card.name] = Position(
+                          boardPosition: pos,
+                          index: i,
+                          depth: list.indexOf(card));
+                    }
+                  }
+                }
+
+                logger.d(dic);
+              },
+              child: const Text("Export"),
+            ),
+            MaterialButton(
+              onPressed: () {},
+              child: const Text("Solver"),
+            )
           ],
         )
       ],

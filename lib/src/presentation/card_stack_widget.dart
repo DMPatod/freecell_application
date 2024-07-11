@@ -64,6 +64,17 @@ class CardStack extends StatelessWidget implements CardHolder {
       var move = details.data as (List<FrenchSuitedCard>, Widget);
       var moveValidated = true;
 
+      if (move.$1.length > 1) {
+        for (var i = 1; i < move.$1.length; i++) {
+          if (move.$1[i - 1].value != move.$1[i].value + 1) {
+            moveValidated = false;
+          }
+          if (move.$1[i - 1].color == move.$1[i].color) {
+            moveValidated = false;
+          }
+        }
+      }
+
       if (move.$1.first.value != cards.last.value - 1) {
         moveValidated = false;
       }
